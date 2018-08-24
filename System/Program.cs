@@ -61,8 +61,7 @@ namespace System
             Stream s = new WebClient().OpenRead(uri.ToString());
 
             System.Drawing.Image img = System.Drawing.Image.FromStream(s);
-            string tempPath = Path.Combine(Path.GetTempPath(), "wallpaper.bmp");
-            Console.WriteLine(tempPath);
+            string tempPath = Path.Combine(Path.GetTempPath(), "wallpaper.bmp");          
             img.Save(tempPath, System.Drawing.Imaging.ImageFormat.Bmp);
 
             RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
